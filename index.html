@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Private Caps Sync</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     body {
       font-family: Arial;
@@ -11,6 +12,7 @@
       margin: 40px auto;
       padding: 20px;
     }
+
     textarea {
       width: 100%;
       height: 150px;
@@ -18,6 +20,7 @@
       font-size: 16px;
       box-sizing: border-box;
     }
+
     #output {
       margin-top: 10px;
       padding: 12px;
@@ -26,17 +29,21 @@
       white-space: pre-wrap;
       background: #f9f9f9;
     }
+
     .hidden { display: none; }
+
+    button {
+      padding: 10px 14px;
+      font-size: 15px;
+      margin-right: 8px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
     input[type="password"] {
       padding: 10px;
       font-size: 16px;
       width: 200px;
-    }
-    button {
-      padding: 10px 14px;
-      font-size: 15px;
-      margin-left: 5px;
-      cursor: pointer;
     }
   </style>
 </head>
@@ -44,20 +51,29 @@
 
 <h2>Private Caps Sync</h2>
 
+<!-- LOGIN -->
 <div id="loginBox">
   <p>Enter password:</p>
   <input type="password" id="passwordInput">
   <button onclick="checkPassword()">Enter</button>
 </div>
 
+<!-- APP -->
 <div id="appBox" class="hidden">
-  <textarea id="input"></textarea>
+  <textarea id="input" placeholder="Type here..."></textarea>
+
+  <div>
+    <button onclick="copyText()">Copy</button>
+    <button onclick="clearText()">Clear</button>
+  </div>
+
   <div id="output"></div>
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue } 
+    from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCHspAXnDDvGNMluo5pn3EDl9STD-sOUJY",
@@ -79,6 +95,7 @@
 
   let textRef;
 
+  // PASSWORD CHECK
   window.checkPassword = function () {
     const pass = document.getElementById("passwordInput").value;
 
@@ -88,19 +105,36 @@
 
       textRef = ref(db, "room_1102");
 
+      // Listen for changes
       onValue(textRef, (snapshot) => {
         const data = snapshot.val() || "";
         input.value = data;
         output.textContent = data;
       });
 
+      // Update database when typing
       input.addEventListener("input", () => {
         const caps = input.value.toUpperCase();
         set(textRef, caps);
       });
+    } else {
+      alert("Wrong password ❌");
     }
   };
+
+  // COPY BUTTON
+  window.copyText = function () {
+    navigator.clipboard.writeText(output.textContent);
+    alert("Copied ✅");
+  };
+
+  // CLEAR BUTTON
+  window.clearText = function () {
+    input.value = "";
+    set(textRef, "");
+  };
+
 </script>
 
 </body>
-</html>                                                                                                                                                                                                                                                                                                                                              </html>
+</html>
