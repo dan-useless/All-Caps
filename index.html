@@ -1,90 +1,106 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Caps Converter</title>
-        <style>
-            body {
-                  font-family: Arial, sans-serif;
-                        margin: 20px;
-                              max-width: 700px;
-                                  }
-                                      h1 { font-size: 22px; }
-                                          textarea {
-                                                width: 100%;
-                                                      height: 150px;
-                                                            padding: 12px;
-                                                                  font-size: 16px;
-                                                                        margin-top: 10px;
-                                                                              box-sizing: border-box;
-                                                                                  }
-                                                                                      .btns {
-                                                                                            display: flex;
-                                                                                                  gap: 10px;
-                                                                                                        margin-top: 10px;
-                                                                                                            }
-                                                                                                                button {
-                                                                                                                      padding: 10px 14px;
-                                                                                                                            font-size: 15px;
-                                                                                                                                  cursor: pointer;
-                                                                                                                                      }
-                                                                                                                                          #output {
-                                                                                                                                                margin-top: 12px;
-                                                                                                                                                      padding: 12px;
-                                                                                                                                                            border: 1px solid #ccc;
-                                                                                                                                                                  min-height: 80px;
-                                                                                                                                                                        white-space: pre-wrap;
-                                                                                                                                                                              font-size: 16px;
-                                                                                                                                                                                    background: #f9f9f9;
-                                                                                                                                                                                        }
-                                                                                                                                                                                            .small {
-                                                                                                                                                                                                  margin-top: 8px;
-                                                                                                                                                                                                        font-size: 12px;
-                                                                                                                                                                                                              color: #444;
-                                                                                                                                                                                                                  }
-                                                                                                                                                                                                                    </style>
-                                                                                                                                                                                                                    </head>
-                                                                                                                                                                                                                    <body>
+  <meta charset="UTF-8">
+  <title>Private Caps Sync</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 12px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    #output {
+      margin-top: 10px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      min-height: 80px;
+      white-space: pre-wrap;
+      background: #f9f9f9;
+    }
+    .hidden { display: none; }
+    input[type="password"] {
+      padding: 10px;
+      font-size: 16px;
+      width: 200px;
+    }
+    button {
+      padding: 10px 14px;
+      font-size: 15px;
+      margin-left: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
 
-                                                                                                                                                                                                                      <h1>Caps Converter</h1>
-                                                                                                                                                                                                                        <p>Type text below — it will instantly convert to <b>ALL CAPS</b>.</p>
+<h2>Private Caps Sync</h2>
 
-                                                                                                                                                                                                                          <textarea id="input" placeholder="Type here..."></textarea>
+<div id="loginBox">
+  <p>Enter password:</p>
+  <input type="password" id="passwordInput">
+  <button onclick="checkPassword()">Enter</button>
+</div>
 
-                                                                                                                                                                                                                            <div class="btns">
-                                                                                                                                                                                                                                <button onclick="copyText()">Copy</button>
-                                                                                                                                                                                                                                    <button onclick="clearText()">Clear</button>
-                                                                                                                                                                                                                                      </div>
+<div id="appBox" class="hidden">
+  <textarea id="input"></textarea>
+  <div id="output"></div>
+</div>
 
-                                                                                                                                                                                                                                        <div id="output"></div>
-                                                                                                                                                                                                                                          <div class="small" id="status"></div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-                                                                                                                                                                                                                                            <script>
-                                                                                                                                                                                                                                                const input = document.getElementById("input");
-                                                                                                                                                                                                                                                    const output = document.getElementById("output");
-                                                                                                                                                                                                                                                        const status = document.getElementById("status");
+  const firebaseConfig = {
+    apiKey: "AIzaSyCHspAXnDDvGNMluo5pn3EDl9STD-sOUJY",
+    authDomain: "allcaps-f9c51.firebaseapp.com",
+    databaseURL: "https://allcaps-f9c51-default-rtdb.firebaseio.com",
+    projectId: "allcaps-f9c51",
+    storageBucket: "allcaps-f9c51.firebasestorage.app",
+    messagingSenderId: "34251463209",
+    appId: "1:34251463209:web:0f2a0517daf05972f01a38"
+  };
 
-                                                                                                                                                                                                                                                            input.addEventListener("input", () => {
-                                                                                                                                                                                                                                                                  output.textContent = input.value.toUpperCase();
-                                                                                                                                                                                                                                                                        status.textContent = "";
-                                                                                                                                                                                                                                                                            });
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-                                                                                                                                                                                                                                                                                function copyText() {
-                                                                                                                                                                                                                                                                                      const text = output.textContent || "";
-                                                                                                                                                                                                                                                                                            navigator.clipboard.writeText(text).then(() => {
-                                                                                                                                                                                                                                                                                                    status.textContent = "Copied ✅";
-                                                                                                                                                                                                                                                                                                          }).catch(() => {
-                                                                                                                                                                                                                                                                                                                  status.textContent = "Copy failed ❌";
-                                                                                                                                                                                                                                                                                                                        });
-                                                                                                                                                                                                                                                                                                                            }
+  const input = document.getElementById("input");
+  const output = document.getElementById("output");
+  const loginBox = document.getElementById("loginBox");
+  const appBox = document.getElementById("appBox");
 
-                                                                                                                                                                                                                                                                                                                                function clearText() {
-                                                                                                                                                                                                                                                                                                                                      input.value = "";
-                                                                                                                                                                                                                                                                                                                                            output.textContent = "";
-                                                                                                                                                                                                                                                                                                                                                  status.textContent = "";
-                                                                                                                                                                                                                                                                                                                                                      }
-                                                                                                                                                                                                                                                                                                                                                        </script>
+  let textRef;
 
-                                                                                                                                                                                                                                                                                                                                                        </body>
-                                                                                                                                                                                                                                                                                                                                                        </html>
+  window.checkPassword = function () {
+    const pass = document.getElementById("passwordInput").value;
+
+    if (pass === "1102") {
+      loginBox.classList.add("hidden");
+      appBox.classList.remove("hidden");
+
+      textRef = ref(db, "room_1102");
+
+      onValue(textRef, (snapshot) => {
+        const data = snapshot.val() || "";
+        input.value = data;
+        output.textContent = data;
+      });
+
+      input.addEventListener("input", () => {
+        const caps = input.value.toUpperCase();
+        set(textRef, caps);
+      });
+    }
+  };
+</script>
+
+</body>
+</html>                                                                                                                                                                                                                                                                                                                                              </html>
