@@ -30,9 +30,7 @@ textarea{
   background:#f9f9f9;
 }
 
-.hidden{
-  display:none;
-}
+.hidden{display:none;}
 
 button{
   padding:10px 14px;
@@ -54,16 +52,13 @@ input[type="password"]{
 
 <h2>Private Caps Sync</h2>
 
-<!-- LOGIN -->
 <div id="loginBox">
   <p>Enter password:</p>
   <input type="password" id="passwordInput">
   <button onclick="checkPassword()">Enter</button>
 </div>
 
-<!-- APP -->
 <div id="appBox" class="hidden">
-
   <textarea id="input" placeholder="Type here..."></textarea>
 
   <div>
@@ -72,7 +67,6 @@ input[type="password"]{
   </div>
 
   <div id="output"></div>
-
 </div>
 
 <script type="module">
@@ -98,86 +92,73 @@ const output = document.getElementById("output");
 const loginBox = document.getElementById("loginBox");
 const appBox = document.getElementById("appBox");
 
-let textRef;
-let mode = "";
+let textRef = null;
+let currentMode = "";
 
 /* PASSWORD CHECK */
 window.checkPassword = function(){
 
   const pass = document.getElementById("passwordInput").value;
 
-  /* PASSWORD 1102 = ALL CAPS MODE */
   if(pass === "1102"){
-
-    mode = "caps";
-
-    loginBox.classList.add("hidden");
-    appBox.classList.remove("hidden");
-
-    textRef = ref(db, "room_1102");
-
-    onValue(textRef, (snapshot)=>{
-      const data = snapshot.val() || "";
-      input.value = data;
-      output.textContent = data;
-    });
-
-    input.addEventListener("input", ()=>{
-      const caps = input.value.toUpperCase();
-      set(textRef, caps);
-    });
-
+    currentMode = "caps";
+    openRoom("room_1102");
   }
-
-  /* PASSWORD 1504 = EXACT COPY MODE */
   else if(pass === "1504"){
-
-    mode = "exact";
-
-    loginBox.classList.add("hidden");
-    appBox.classList.remove("hidden");
-
-    textRef = ref(db, "room_1504");
-
-    onValue(textRef, (snapshot)=>{
-      const data = snapshot.val() || "";
-      input.value = data;
-      output.textContent = data;
-    });
-
-    input.addEventListener("input", ()=>{
-      set(textRef, input.value);
-    });
-
+    currentMode = "exact";
+    openRoom("room_1504");
   }
-
   else{
     alert("Wrong password ❌");
   }
 };
 
+/* OPEN ROOM */
+function openRoom(roomName){
 
-/* COPY BUTTON */
-window.copyText = function(){
+  loginBox.classList.add("hidden");
+  appBox.classList.remove("hidden");
 
-  navigator.clipboard.writeText(output.textContent)
-  .then(()=>{
-    alert("Copied ✅");
+  textRef = ref(db, roomName);
+
+  /* READ LIVE DATA */
+  onValue(textRef, (snapshot)=>{
+    const data = snapshot.val() || "";
+    input.value = data;
+    output.textContent = data;
   });
 
+  /* REMOVE OLD EVENTS */
+  input.oninput = null;
+
+  /* WRITE LIVE DATA */
+  input.oninput = function(){
+
+    let val = input.value;
+
+    if(currentMode === "caps"){
+      val = val.toUpperCase();
+    }
+
+    output.textContent = val;
+    set(textRef, val);
+  };
+}
+
+/* COPY */
+window.copyText = function(){
+  navigator.clipboard.writeText(output.textContent);
+  alert("Copied ✅");
 };
 
-
-/* CLEAR BUTTON */
+/* CLEAR */
 window.clearText = function(){
-
   input.value = "";
   output.textContent = "";
 
   if(textRef){
     set(textRef, "");
   }
-
 };
 </script>
 
