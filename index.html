@@ -1,52 +1,55 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Private Caps Sync</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Private Caps Sync</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      font-family: Arial;
-      max-width: 700px;
-      margin: 40px auto;
-      padding: 20px;
-    }
+<style>
+body{
+  font-family:Arial;
+  max-width:700px;
+  margin:40px auto;
+  padding:20px;
+}
 
-    textarea {
-      width: 100%;
-      height: 150px;
-      padding: 12px;
-      font-size: 16px;
-      box-sizing: border-box;
-    }
+textarea{
+  width:100%;
+  height:170px;
+  padding:12px;
+  font-size:16px;
+  box-sizing:border-box;
+}
 
-    #output {
-      margin-top: 10px;
-      padding: 12px;
-      border: 1px solid #ccc;
-      min-height: 80px;
-      white-space: pre-wrap;
-      background: #f9f9f9;
-    }
+#output{
+  margin-top:10px;
+  padding:12px;
+  border:1px solid #ccc;
+  min-height:90px;
+  white-space:pre-wrap;
+  background:#f9f9f9;
+}
 
-    .hidden { display: none; }
+.hidden{
+  display:none;
+}
 
-    button {
-      padding: 10px 14px;
-      font-size: 15px;
-      margin-right: 8px;
-      margin-top: 10px;
-      cursor: pointer;
-    }
+button{
+  padding:10px 14px;
+  font-size:15px;
+  margin-right:8px;
+  margin-top:10px;
+  cursor:pointer;
+}
 
-    input[type="password"] {
-      padding: 10px;
-      font-size: 16px;
-      width: 200px;
-    }
-  </style>
+input[type="password"]{
+  padding:10px;
+  font-size:16px;
+  width:220px;
+}
+</style>
 </head>
+
 <body>
 
 <h2>Private Caps Sync</h2>
@@ -60,6 +63,7 @@
 
 <!-- APP -->
 <div id="appBox" class="hidden">
+
   <textarea id="input" placeholder="Type here..."></textarea>
 
   <div>
@@ -68,72 +72,113 @@
   </div>
 
   <div id="output"></div>
+
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-  import { getDatabase, ref, set, onValue } 
-    from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getDatabase, ref, set, onValue }
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCHspAXnDDvGNMluo5pn3EDl9STD-sOUJY",
-    authDomain: "allcaps-f9c51.firebaseapp.com",
-    databaseURL: "https://allcaps-f9c51-default-rtdb.firebaseio.com",
-    projectId: "allcaps-f9c51",
-    storageBucket: "allcaps-f9c51.firebasestorage.app",
-    messagingSenderId: "34251463209",
-    appId: "1:34251463209:web:0f2a0517daf05972f01a38"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyCHspAXnDDvGNMluo5pn3EDl9STD-sOUJY",
+  authDomain: "allcaps-f9c51.firebaseapp.com",
+  databaseURL: "https://allcaps-f9c51-default-rtdb.firebaseio.com",
+  projectId: "allcaps-f9c51",
+  storageBucket: "allcaps-f9c51.firebasestorage.app",
+  messagingSenderId: "34251463209",
+  appId: "1:34251463209:web:0f2a0517daf05972f01a38"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-  const input = document.getElementById("input");
-  const output = document.getElementById("output");
-  const loginBox = document.getElementById("loginBox");
-  const appBox = document.getElementById("appBox");
+const input = document.getElementById("input");
+const output = document.getElementById("output");
+const loginBox = document.getElementById("loginBox");
+const appBox = document.getElementById("appBox");
 
-  let textRef;
+let textRef;
+let mode = "";
 
-  // PASSWORD CHECK
-  window.checkPassword = function () {
-    const pass = document.getElementById("passwordInput").value;
+/* PASSWORD CHECK */
+window.checkPassword = function(){
 
-    if (pass === "1102") {
-      loginBox.classList.add("hidden");
-      appBox.classList.remove("hidden");
+  const pass = document.getElementById("passwordInput").value;
 
-      textRef = ref(db, "room_1102");
+  /* PASSWORD 1102 = ALL CAPS MODE */
+  if(pass === "1102"){
 
-      // Listen for changes
-      onValue(textRef, (snapshot) => {
-        const data = snapshot.val() || "";
-        input.value = data;
-        output.textContent = data;
-      });
+    mode = "caps";
 
-      // Update database when typing
-      input.addEventListener("input", () => {
-        const caps = input.value.toUpperCase();
-        set(textRef, caps);
-      });
-    } else {
-      alert("Wrong password ❌");
-    }
-  };
+    loginBox.classList.add("hidden");
+    appBox.classList.remove("hidden");
 
-  // COPY BUTTON
-  window.copyText = function () {
-    navigator.clipboard.writeText(output.textContent);
+    textRef = ref(db, "room_1102");
+
+    onValue(textRef, (snapshot)=>{
+      const data = snapshot.val() || "";
+      input.value = data;
+      output.textContent = data;
+    });
+
+    input.addEventListener("input", ()=>{
+      const caps = input.value.toUpperCase();
+      set(textRef, caps);
+    });
+
+  }
+
+  /* PASSWORD 1504 = EXACT COPY MODE */
+  else if(pass === "1504"){
+
+    mode = "exact";
+
+    loginBox.classList.add("hidden");
+    appBox.classList.remove("hidden");
+
+    textRef = ref(db, "room_1504");
+
+    onValue(textRef, (snapshot)=>{
+      const data = snapshot.val() || "";
+      input.value = data;
+      output.textContent = data;
+    });
+
+    input.addEventListener("input", ()=>{
+      set(textRef, input.value);
+    });
+
+  }
+
+  else{
+    alert("Wrong password ❌");
+  }
+};
+
+
+/* COPY BUTTON */
+window.copyText = function(){
+
+  navigator.clipboard.writeText(output.textContent)
+  .then(()=>{
     alert("Copied ✅");
-  };
+  });
 
-  // CLEAR BUTTON
-  window.clearText = function () {
-    input.value = "";
+};
+
+
+/* CLEAR BUTTON */
+window.clearText = function(){
+
+  input.value = "";
+  output.textContent = "";
+
+  if(textRef){
     set(textRef, "");
-  };
+  }
 
+};
 </script>
 
 </body>
