@@ -121,27 +121,33 @@ function openRoom(roomName){
 
   textRef = ref(db, roomName);
 
-  /* READ LIVE DATA */
+  /* LOAD SAVED DATA */
   onValue(textRef, (snapshot)=>{
     const data = snapshot.val() || "";
     input.value = data;
     output.textContent = data;
   });
 
-  /* REMOVE OLD EVENTS */
+  /* IMPORTANT: use addEventListener only once */
   input.oninput = null;
 
-  /* WRITE LIVE DATA */
-  input.oninput = function(){
+  input.oninput = async function(){
 
     let val = input.value;
 
     if(currentMode === "caps"){
       val = val.toUpperCase();
+      input.value = val;
     }
 
     output.textContent = val;
-    set(textRef, val);
+
+    try{
+      await set(textRef, val);
+    }catch(err){
+      console.log(err);
+      alert("Save failed");
+    }
   };
 }
 
@@ -152,12 +158,13 @@ window.copyText = function(){
 };
 
 /* CLEAR */
-window.clearText = function(){
+window.clearText = async function(){
+
   input.value = "";
   output.textContent = "";
 
   if(textRef){
-    set(textRef, "");
+    await set(textRef, "");
   }
 };
 </script>
